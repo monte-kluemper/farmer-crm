@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { seedDemoData } from "./actions";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -95,10 +96,16 @@ export default async function DashboardPage() {
                         attention.
                     </p>
                 </div>
-
-                <Button asChild>
-                    <Link href="/restaurants/new">Add restaurant</Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button asChild>
+                        <Link href="/restaurants/new">Add restaurant</Link>
+                    </Button>
+                    <form action={seedDemoData}>
+                        <Button type="submit" variant="secondary">
+                            Seed demo data
+                        </Button>
+                    </form>
+                </div>
             </div>
 
             {errors.length > 0 ? (
