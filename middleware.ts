@@ -9,21 +9,32 @@ export async function middleware(req: NextRequest) {
 
     const pathname = req.nextUrl.pathname;
 
-    const protectedPaths = ["/dashboard"];
-    const isProtected =
-        protectedPaths.includes(pathname) || protectedPaths.some((p) => pathname.startsWith(p + "/"));
+    const protectedPaths = ["/dashboard", "/restaurants", "/customers", "/settings"];
+    const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-    if (isProtected && !user) {
-        const url = req.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set("next", pathname);
-        return NextResponse.redirect(url);
-    }
+    if (isProtected) {
+        if (!user) {
+            const url = req.nextUrl.clone();
+            url.pathname = "/login";
+            url.searchParams.set("next", pathname);
+            return NextResponse.redirect(url);
+        }
 
-    if (pathname === "/login" && user) {
-        const url = req.nextUrl.clone();
-        url.pathname = "/dashboard";
-        return NextResponse.redirect(url);
+        // If logged in but not onboarded, send to onboarding
+        const { data: memberships } = await supabase
+            .from("farm_memberships")
+            .select("farm_id")
+            .limit(1);
+
+        if (!memberships || memberships.length === 0) {
+            const url = req.nextUrl.clone();
+            url.pathname = "/onboarding";
+            return NextResponse.redirect(url);
+        } else if (pathname === "/login" && user) {
+            const url = req.nextUrl.clone();
+            url.pathname = "/dashboard";
+            return NextResponse.redirect(url);
+        }
     }
 
     return res;
