@@ -98,7 +98,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex gap-2">
                     <Button asChild>
-                        <Link href="/restaurants/new">Add restaurant</Link>
+                        <Link href="/restaurant">Your Restaurants</Link>
                     </Button>
                     <form action={seedDemoData}>
                         <Button type="submit" variant="secondary">
@@ -149,7 +149,7 @@ function HotLeadsWidget({ rows }: { rows: HotLeadRow[] }) {
                     <EmptyState
                         title="No leads yet"
                         description="Add a restaurant from URL to generate a profile and lead score."
-                        href="/restaurants/new"
+                        href="/restaurant/new"
                         action="Add restaurant"
                     />
                 ) : (
@@ -176,7 +176,7 @@ function HotLeadsWidget({ rows }: { rows: HotLeadRow[] }) {
                                 <span>Next: {formatDateTime(r.next_due_at)}</span>
                                 <Link
                                     className="text-xs underline underline-offset-2"
-                                    href={`/restaurants/${r.restaurant_id}`}
+                                    href={`/restaurant/${r.restaurant_id}`}
                                 >
                                     Open
                                 </Link>
@@ -202,7 +202,7 @@ function NextActionsWidget({ rows }: { rows: NextActionRow[] }) {
                     <EmptyState
                         title="No tasks due"
                         description="When you log visits and follow-ups, tasks will show up here."
-                        href="/restaurants/new"
+                        href="/restaurant/new"
                         action="Add restaurant"
                     />
                 ) : (
@@ -228,7 +228,7 @@ function NextActionsWidget({ rows }: { rows: NextActionRow[] }) {
                                 <span>Due: {formatDateTime(a.due_at)}</span>
                                 <Link
                                     className="text-xs underline underline-offset-2"
-                                    href={`/restaurants/${a.restaurant_id}`}
+                                    href={`/restaurant/${a.restaurant_id}`}
                                 >
                                     Open
                                 </Link>
@@ -283,7 +283,7 @@ function AtRiskWidget({ rows }: { rows: AtRiskRow[] }) {
                                 <span>Next: {formatDateTime(r.next_due_at)}</span>
                                 <Link
                                     className="text-xs underline underline-offset-2"
-                                    href={`/restaurants/${r.restaurant_id}`}
+                                    href={`/restaurant/${r.restaurant_id}`}
                                 >
                                     Open
                                 </Link>

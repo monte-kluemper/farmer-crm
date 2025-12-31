@@ -19,7 +19,7 @@ export async function seedDemoData() {
 
     // Optionally redirect to the new restaurant
     const restaurantId = data?.restaurant_id as string | undefined;
-    if (restaurantId) redirect(`/restaurants/${restaurantId}?seeded=1`);
+    if (restaurantId) redirect(`/restaurant/${restaurantId}?seeded=1`);
 
     redirect("/dashboard?seeded=1");
 }

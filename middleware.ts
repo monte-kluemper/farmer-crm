@@ -9,8 +9,10 @@ export async function middleware(req: NextRequest) {
 
     const pathname = req.nextUrl.pathname;
 
-    const protectedPaths = ["/dashboard", "/restaurants", "/customers", "/settings"];
+    const protectedPaths = ["/dashboard", "/restaurant", "/customers", "/settings"];
     const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
+    console.log("isProtected:", isProtected, "Pathname:", pathname, "User:", user);
 
     if (isProtected) {
         if (!user) {
@@ -26,13 +28,15 @@ export async function middleware(req: NextRequest) {
             .select("farm_id")
             .limit(1);
 
+        console.log("Memberships:", memberships);
+
         if (!memberships || memberships.length === 0) {
             const url = req.nextUrl.clone();
             url.pathname = "/onboarding";
             return NextResponse.redirect(url);
         } else if (pathname === "/login" && user) {
             const url = req.nextUrl.clone();
-            url.pathname = "/dashboard";
+            url.pathname = "/gate";
             return NextResponse.redirect(url);
         }
     }

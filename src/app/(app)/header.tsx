@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,16 @@ export default async function AppHeader() {
             <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
                 {/* Left: brand / nav */}
                 <div className="flex items-center gap-6">
-                    <Link href="/dashboard" className="font-semibold">
-                        Isifarmer CRM
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                        <Image
+                            src="/logotext310x50.png"
+                            alt="Isifarmer"
+                            width={120}
+                            height={32}
+                            priority
+                        />
                     </Link>
-
+                    
                     <nav className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
                         <Link href="/dashboard" className="hover:text-foreground">
                             Dashboard

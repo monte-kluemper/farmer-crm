@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function signInWithMagicLink(formData: FormData) {
     const email = String(formData.get("email") || "").trim();
-    const next = String(formData.get("next") || "/dashboard");
+    const next = String(formData.get("next") || "/gate");
 
     if (!email) redirect("/login?error=missing_email");
 
