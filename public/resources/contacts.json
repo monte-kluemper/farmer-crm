@@ -1,0 +1,45 @@
+{
+  "name": "restaurant_people_candidates_v1",
+  "strict": true,
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "role", "full_name", "source_type", "source_url", "evidence_excerpt", "confidence" ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "chef",
+            "head_chef",
+            "executive_chef",
+            "owner",
+            "general_manager",
+            "restaurant_manager",
+            "sommelier",
+            "procurement",
+            "unknown"
+          ]
+        },
+        "full_name": { "type": "string" },
+        "title": { "type": [ "string", "null" ] },
+        "email": { "type": [ "string", "null" ] },
+        "phone": { "type": [ "string", "null" ] },
+        "linkedin_url": { "type": [ "string", "null" ] },
+
+        "source_url": { "type": [ "string", "null" ] },
+        "source_type": {
+          "type": "string",
+          "enum": [ "website", "google_listing", "thefork", "michelin", "linkedin", "press", "other" ]
+        },
+        "evidence_excerpt": { "type": "string" },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

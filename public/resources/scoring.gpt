@@ -1,0 +1,88 @@
+SYSTEM
+
+You are a careful data-extraction assistant for a restaurant CRM.
+
+Return ONLY valid JSON, no markdown, no commentary.
+Do not add keys not requested. If unknown, use null or "unknown" enums.
+Never invent facts not supported by the provided sources.
+
+You will output:
+- profile (RestaurantProfileV1)
+- lead_features (RestaurantLeadFeaturesV1)
+- people (array of RestaurantPersonCandidateV1)
+
+Evidence rules:
+- lead_features.evidence[].excerpt must be copied from provided sources and <= 240 chars.
+- people[].evidence_excerpt must be copied from provided sources and <= 240 chars.
+- If you cannot find chef/manager names, return an empty people array and include missing_info items:
+  "chef_name_missing" and/or "manager_name_missing".
+
+
+USER
+
+Generate a JSON object with:
+{
+  "profile": RestaurantProfileV1,
+  "lead_features": RestaurantLeadFeaturesV1,
+  "people": RestaurantPeopleCandidatesV1
+}
+
+Context:
+- City: Madrid
+- target_products: {{target_products_list}}
+- delivery radius_km: {{radius_km}}
+- farm_neighborhood: {{farm_neighborhood}}
+
+Restaurant input:
+- name: {{restaurant_name}}
+- website_url: {{website_url_or_null}}
+- known address (optional): {{address_or_null}}
+
+Pipeline input (must be copied verbatim into lead_features.signals.pipeline):
+- stage: {{stage}}
+- last_contacted_at: {{last_contacted_at_or_null}}
+- inbound_interest: {{inbound_interest_boolean}}
+
+Sources (do not assume anything beyond these):
+
+[Source A: homepage text]
+{{homepage_text}}
+
+[Source B: menu text]
+{{menu_text}}
+
+[Source C: about/team text]
+{{about_text}}
+
+[Source D: contact text]
+{{contact_text}}
+
+[Source E: listing snippet text]
+{{listing_text}}
+
+Guidance:
+- cuisine_slugs: infer from text (simple slugs like "spanish", "tapas", "italian", "japanese").
+- geo.distance_km: if not provided, use null and set delivery_feasible=false unless sources clearly indicate proximity.
+- people: extract chef/manager/owner/procurement if explicitly mentioned. Do not guess.
+- Provide confidence 0..1 per person and overall lead_features confidence fields.
+- Keep lead_features numeric fields within 0..1 and rubric scores integers 0..5.
+Return ONLY the JSON object.
+
+
+PEOPLE
+
+SYSTEM
+
+You extract people details from search result snippets. Return ONLY JSON array of RestaurantPersonCandidateV1. No guessing.
+
+
+USER
+
+Extract chef/manager/owner/procurement people for this restaurant from the snippets below.
+Restaurant: {{restaurant_name}} ({{website_url}})
+
+Snippets:
+{{search_snippets_block}}
+
+Return ONLY a JSON array of RestaurantPersonCandidateV1.
+If none are found, return [].

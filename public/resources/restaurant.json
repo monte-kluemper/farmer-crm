@@ -1,0 +1,63 @@
+{
+  "name": "restaurant_profile_v1",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [ "schema_version", "name", "website_url", "service_style", "price_tier", "cuisine_slugs", "contact", "locations" ],
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "v1"
+      },
+      "name": { "type": "string" },
+      "website_url": { "type": [ "string", "null" ] },
+      "address": { "type": [ "string", "null" ] },
+      "city": { "type": [ "string", "null" ] },
+      "neighborhood_guess": { "type": [ "string", "null" ] },
+
+      "service_style": {
+        "type": "string",
+        "enum": [ "fine_dining", "casual", "fast_casual", "takeaway", "bar_cafe", "hotel", "unknown" ]
+      },
+      "price_tier": {
+        "type": "string",
+        "enum": [ "low", "mid", "high", "unknown" ]
+      },
+
+      "cuisine_slugs": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+
+      "contact": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "has_contact_page", "reservation_platform" ],
+        "properties": {
+          "has_contact_page": { "type": "boolean" },
+          "email": { "type": [ "string", "null" ] },
+          "phone": { "type": [ "string", "null" ] },
+          "contact_url": { "type": [ "string", "null" ] },
+          "reservation_platform": {
+            "type": "string",
+            "enum": [ "opentable", "thefork", "resy", "sevenrooms", "phone_only", "unknown", "none" ]
+          }
+        }
+      },
+
+      "locations": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "location_count_guess", "is_chain_guess" ],
+        "properties": {
+          "location_count_guess": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "is_chain_guess": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
