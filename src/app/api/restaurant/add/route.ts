@@ -47,9 +47,9 @@ const RestaurantProfileZ = z.object({
         tasting_menu_eur: z.number().nullable(),
         ala_carte_main_eur: z.number().nullable(),
     }),
-    menu_signals: z.object({
+    menu_signals: z.looseObject({
         plating_intensity: z.enum(["low", "medium", "high", "very_high", "unknown"]),
-    }).passthrough(),
+    }),
     off_menu_signals: z.object({
         chef_selection_language: z.boolean(),
         market_driven: z.boolean(),

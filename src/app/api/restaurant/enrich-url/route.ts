@@ -6,6 +6,8 @@ import {
     RestaurantProfileV1,
     RestaurantLeadFeaturesV1,
     RestaurantPeopleCandidatesV1,
+    type RestaurantLeadFeaturesV1 as RestaurantLeadFeaturesV1Type,
+    type RestaurantPersonCandidateV1 as RestaurantPersonCandidateV1Type,
 } from "@/lib/schemas/restaurant";
 import { scrapeRestaurantSources } from "@/lib/scrape/scrapeRestaurantSources";
 import { gptEnrichRestaurant } from "@/lib/gpt/gptEnrichRestaurant";
@@ -15,7 +17,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 const Q = z.object({
-    url: z.string().url(),
+    url: z.url({ message: "Invalid website URL" }),
     commit: z.string().optional(), // "1" to commit
     radius_km: z.string().optional(),
 });
@@ -34,7 +36,12 @@ export async function GET(req: Request) {
     // Default target products for quick tests; change to your real set
     const target_products = ["microgreens", "basil", "edible_flowers", "baby_leaf_mix"];
 
-    const pipeline = { stage: "new", last_contacted_at: null, inbound_interest: false };
+    //const pipeline = { stage: "new", last_contacted_at: null, inbound_interest: false };
+    const pipeline: RestaurantLeadFeaturesV1Type["signals"]["pipeline"] = {
+        stage: "new",
+        last_contacted_at: null,
+        inbound_interest: false,
+    };
 
     // 1) scrape
     const sources = await scrapeRestaurantSources(q.url);
@@ -53,7 +60,8 @@ export async function GET(req: Request) {
     const enriched = RestaurantEnrichOutputV1.parse(raw);
 
     // force pipeline to current
-    enriched.lead_features.signals.pipeline = pipeline as any;
+//    enriched.lead_features.signals.pipeline = pipeline as any;
+    enriched.lead_features.signals.pipeline = pipeline;
 
     // 3) score
     const score = scoreRestaurantLead(enriched.lead_features, {
@@ -63,11 +71,12 @@ export async function GET(req: Request) {
 
     // 4) optional commit
     if (commit) {
-        const supabase = createSupabaseServerClient();
+        const supabase = await createSupabaseServerClient();
 
         const profile = RestaurantProfileV1.parse(enriched.profile);
         const people = RestaurantPeopleCandidatesV1.parse(enriched.people);
-        const lead_features = RestaurantLeadFeaturesV1.parse(enriched.lead_features);
+        //const lead_features = RestaurantLeadFeaturesV1.parse(enriched.lead_features);
+        RestaurantLeadFeaturesV1.parse(enriched.lead_features);
 
         // Upsert restaurant
         const { data: restaurantRow, error: upsertErr } = await supabase
@@ -95,7 +104,7 @@ export async function GET(req: Request) {
 
         // People upsert
         if (people.length > 0) {
-            const rows = people.map((p) => ({
+            const rows = people.map((p: RestaurantPersonCandidateV1Type) => ({
                 restaurant_id,
                 role: p.role,
                 full_name: p.full_name,
