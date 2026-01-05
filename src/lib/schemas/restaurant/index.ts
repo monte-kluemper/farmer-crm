@@ -3,7 +3,6 @@
 // Central export surface for restaurant schemas + versioned helpers.
 // Keep Zod schemas as the runtime source of truth.
 // JSON schema files (if you keep them) can be imported as artifacts for prompts/docs.
-
 export {
     RestaurantProfileV1,
     type RestaurantProfileV1 as RestaurantProfileV1Type,
@@ -29,7 +28,7 @@ export const ENRICH_PROMPT_VERSION_V1 = "enrich_v1.0" as const;
 // -------------------------
 import restaurantProfileV1Json from "./restaurantProfile.v1.json";
 import restaurantLeadFeaturesV1Json from "./restaurantLeadFeatures.v1.json";
-import restaurantPeopleV1Json from "./restaurantPeople.v1.json";
+import restaurantPeopleV1Json from "./restaurantPeopleCandidates.v1.json";
 
 export const RestaurantProfileV1JsonSchema = restaurantProfileV1Json;
 export const RestaurantLeadFeaturesV1JsonSchema = restaurantLeadFeaturesV1Json;
@@ -45,7 +44,7 @@ export type SchemaVersion = typeof RESTAURANT_SCHEMA_VERSION_V1;
  * Prefer parsing with Zod for untrusted input (GPT/web/DB).
  */
 export function isSchemaV1(obj: unknown): obj is { schema_version: "v1" } {
-    return Boolean(obj && typeof obj === "object" && (obj as any).schema_version === "v1");
+    return Boolean(obj && typeof obj === "object" && (obj as { schema_version?: string }).schema_version === "v1");
 }
 
 /**
