@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { createSupabaseRouteClient } from "@/lib/supabase/route";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { enrichAndScoreRestaurant } from "@/lib/restaurant/enrichAndScoreRestaurant";
 import { getMyFarmIdOrThrow, getMadridCityId } from "@/lib/farm";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
@@ -142,6 +143,14 @@ ${text}
         restaurant_id: restaurantId,
         source_url: url,
         parsed: profile,
+    });
+
+    await enrichAndScoreRestaurant({
+        farmId,
+        restaurantId,
+        websiteUrl: profile.website_url ?? url, // or url
+        pipeline: { stage: "identified", last_contacted_at: null, inbound_interest: false },
+        commit: true,
     });
 
     return { restaurantId };

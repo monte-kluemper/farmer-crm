@@ -52,6 +52,28 @@ function stableJsonHash(value: unknown) {
     return sha256(JSON.stringify(value));
 }
 
+
+function clampInt(n: unknown, min: number, max: number) {
+    const x = typeof n === "number" ? n : Number(n);
+    if (!Number.isFinite(x)) return min;
+    return Math.max(min, Math.min(max, Math.round(x)));
+}
+
+function sanitizeRubric(raw: any) {
+    if (!raw?.lead_features?.rubric) return raw;
+    const r = raw.lead_features.rubric;
+
+    r.menu_fit_score = clampInt(r.menu_fit_score, 0, 5);
+    r.local_affinity_score = clampInt(r.local_affinity_score, 0, 5);
+    r.volume_score = clampInt(r.volume_score, 0, 5);
+    r.outreach_ease_score = clampInt(r.outreach_ease_score, 0, 5);
+    r.brand_alignment_score = clampInt(r.brand_alignment_score, 0, 5);
+    r.risk_score = clampInt(r.risk_score, 0, 5);
+
+    return raw;
+}
+
+
 export async function POST(req: Request) {
     const supabase = createSupabaseRouteClient();
     //const supabase = createSupabaseServerClient();
@@ -126,7 +148,9 @@ export async function POST(req: Request) {
             sources,
         });
 
-        const gptOut = RestaurantEnrichOutputV1.parse(gptOutRaw);
+        const raw2 = sanitizeRubric(gptOutRaw);
+        const gptOut = RestaurantEnrichOutputV1.parse(raw2);
+
 
         // Always enforce current pipeline
         gptOut.lead_features.signals.pipeline = input.pipeline;
