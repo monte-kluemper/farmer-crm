@@ -3,12 +3,17 @@ import { addRestaurantByUrl } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function AddRestaurantPage({
+type SearchParams =
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+
+export default async function AddRestaurantPage({
     searchParams,
 }: {
-    searchParams?: { [key: string]: string | string[] | undefined };
+    searchParams?: SearchParams;
 }) {
-    const error = typeof searchParams?.error === "string" ? searchParams.error : "";
+    const sp = (searchParams instanceof Promise ? await searchParams : searchParams) ?? {};
+    const error = typeof sp.error === "string" ? sp.error : "";
 
     return (
         <div className="p-6 space-y-6 max-w-2xl">

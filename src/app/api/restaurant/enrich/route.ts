@@ -9,7 +9,7 @@ import {
     RestaurantPeopleCandidatesV1,
 } from "@/lib/schemas/restaurant";
 import { scoreRestaurantLead, DEFAULT_WEIGHTS_V1 } from "@/lib/leadScoring";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseRouteClient } from "@/lib/supabase/route";
 
 // Implement these in your codebase:
 import { scrapeRestaurantSources } from "@/lib/scrape/scrapeRestaurantSources";
@@ -53,7 +53,8 @@ function stableJsonHash(value: unknown) {
 }
 
 export async function POST(req: Request) {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseRouteClient();
+    //const supabase = createSupabaseServerClient();
 
     try {
         const input = ReqSchema.parse(await req.json());

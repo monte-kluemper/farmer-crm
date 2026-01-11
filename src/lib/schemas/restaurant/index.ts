@@ -29,10 +29,12 @@ export const ENRICH_PROMPT_VERSION_V1 = "enrich_v1.0" as const;
 import restaurantProfileV1Json from "./restaurantProfile.v1.json";
 import restaurantLeadFeaturesV1Json from "./restaurantLeadFeatures.v1.json";
 import restaurantPeopleV1Json from "./restaurantPeopleCandidates.v1.json";
+import restaurantEnrichOutputV1Json from "./restaurantEnrichOutput.v1.json";
 
 export const RestaurantProfileV1JsonSchema = restaurantProfileV1Json;
 export const RestaurantLeadFeaturesV1JsonSchema = restaurantLeadFeaturesV1Json;
 export const RestaurantPeopleCandidatesV1JsonSchema = restaurantPeopleV1Json;
+export const RestaurantEnrichOutputV1JsonSchema = restaurantEnrichOutputV1Json;
 
 // -------------------------
 // Tiny helper types/utilities

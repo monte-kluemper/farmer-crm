@@ -1,23 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { addRestaurantFromUrl } from "@/lib/restaurant/addRestaurantFromUrl";
 
 export async function addRestaurantByUrl(formData: FormData) {
     const url = String(formData.get("url") || "").trim();
     if (!url) redirect("/restaurant/new?error=missing_url");
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/restaurant/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-        cache: "no-store",
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-        redirect(`/restaurant/new?error=${encodeURIComponent(json?.error ?? "Failed to add restaurant")}`);
+    try {
+        const { restaurantId } = await addRestaurantFromUrl(url);
+        redirect(`/restaurant/${restaurantId}?created=1`);
+    } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to add restaurant";
+        redirect(`/restaurant/new?error=${encodeURIComponent(msg)}`);
     }
-
-    redirect(`/restaurant/${json.restaurant_id}?created=1`);
 }

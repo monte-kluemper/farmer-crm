@@ -1,16 +1,7 @@
+// src/lib/gpt/gptEnrichRestaurant.ts
 import { openai } from "@/lib/openai/server";
 import type { ScrapeSources } from "@/lib/scrape/scrapeRestaurantSources";
-
-function extractFirstJsonObject(text: string): any {
-    // Find the first {...} block and parse it.
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1 || end <= start) {
-        throw new Error("No JSON object found in model output");
-    }
-    const slice = text.slice(start, end + 1);
-    return JSON.parse(slice);
-}
+import { RestaurantEnrichOutputV1JsonSchema } from "@/lib/schemas/restaurant";
 
 export async function gptEnrichRestaurant(args: {
     website_url: string;
@@ -46,7 +37,9 @@ Evidence rules:
 - lead_features.evidence[].excerpt must be copied from provided sources and <= 240 chars.
 - people[].evidence_excerpt must be copied from provided sources and <= 240 chars.
 - If you cannot find chef/manager names, return an empty people array and include missing_info items:
-  "chef_name_missing" and/or "manager_name_missing".`;
+  "chef_name_missing" and/or "manager_name_missing".
+- For service_style, you MUST output one of: fine_dining, casual, fast_casual, takeaway, bar_cafe, hotel, unknown.
+- For price_tier, you MUST output one of: low, mid, high, unknown.`;
 
     const user = `Generate a JSON object with:
 {
@@ -90,12 +83,6 @@ ${sources.listing ?? ""}
 [Source F: JSON-LD blocks (raw)]
 ${sources.jsonld ?? ""}
 
-Guidance:
-- cuisine_slugs: infer from text (simple slugs like "spanish", "tapas", "italian", "japanese").
-- geo.distance_km: if not provided, use null and set delivery_feasible=false unless sources clearly indicate proximity.
-- people: extract chef/manager/owner/procurement if explicitly mentioned. Do not guess.
-- Provide confidence 0..1 per person and overall lead_features confidence fields.
-- Keep lead_features numeric fields within 0..1 and rubric scores integers 0..5.
 Return ONLY the JSON object.`;
 
     const resp = await openai.responses.create({
@@ -104,21 +91,27 @@ Return ONLY the JSON object.`;
             { role: "system", content: system },
             { role: "user", content: user },
         ],
-        // Keep it deterministic-ish
-        temperature: 0.2,
-    });
+        // Structured output (Responses API)
+        text: {
+            format: {
+                type: "json_schema",
+                name: RestaurantEnrichOutputV1JsonSchema.name,
+                schema: RestaurantEnrichOutputV1JsonSchema.schema,
+                strict: false,
+            },
+        },
+    } as unknown as Parameters<typeof openai.responses.create>[0]); // keeps TS happy across SDK versions
 
-    const text =
-        resp.output_text ??
-        (() => {
-            // fallback: try to gather text from output parts
-            const parts: string[] = [];
-            for (const item of resp.output ?? []) {
-                // @ts-expect-error - output shape varies
-                for (const c of item?.content ?? []) parts.push(c?.text ?? "");
-            }
-            return parts.join("\n");
-        })();
+    // SDK versions vary: some expose output_parsed, others only output_text.
+    const parsed = (resp as unknown as { output_parsed?: unknown }).output_parsed;
+    if (parsed) return parsed;
 
-    return extractFirstJsonObject(text);
+    const outputText = (resp as unknown as { output_text?: string }).output_text ?? "";
+    if (!outputText) throw new Error("Model returned no output_text and no output_parsed.");
+
+    // Fallback parse (should be rare if schema format is supported)
+    const start = outputText.indexOf("{");
+    const end = outputText.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) throw new Error("No JSON object found in output_text");
+    return JSON.parse(outputText.slice(start, end + 1)) as unknown;
 }

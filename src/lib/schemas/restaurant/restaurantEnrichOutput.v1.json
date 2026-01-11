@@ -1,0 +1,441 @@
+{
+  "name": "restaurant_enrich_output_v1",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [ "profile", "lead_features", "people" ],
+    "properties": {
+      "profile": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "name",
+          "website_url",
+          "address",
+          "city",
+          "neighborhood_guess",
+          "service_style",
+          "price_tier",
+          "cuisine_slugs",
+          "contact",
+          "locations"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "v1"
+          },
+          "name": { "type": "string" },
+          "website_url": { "type": [ "string", "null" ] },
+
+          "address": { "type": [ "string", "null" ] },
+          "city": { "type": [ "string", "null" ] },
+          "neighborhood_guess": { "type": [ "string", "null" ] },
+
+          "service_style": {
+            "type": "string",
+            "enum": [ "fine_dining", "casual", "fast_casual", "takeaway", "bar_cafe", "hotel", "unknown" ]
+          },
+
+          "price_tier": {
+            "type": "string",
+            "enum": [ "low", "mid", "high", "unknown" ]
+          },
+
+          "cuisine_slugs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+
+          "contact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "has_contact_page",
+              "email",
+              "phone",
+              "contact_url",
+              "reservation_platform"
+            ],
+            "properties": {
+              "has_contact_page": { "type": "boolean" },
+              "email": { "type": [ "string", "null" ] },
+              "phone": { "type": [ "string", "null" ] },
+              "contact_url": { "type": [ "string", "null" ] },
+              "reservation_platform": { "type": "string" }
+            }
+          },
+
+          "locations": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "location_count_guess", "is_chain_guess" ],
+            "properties": {
+              "location_count_guess": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "is_chain_guess": { "type": "boolean" }
+            }
+          }
+        }
+      },
+
+      "lead_features": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "restaurant",
+          "signals",
+          "rubric",
+          "confidence",
+          "evidence",
+          "missing_info",
+          "generated_at"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "v1"
+          },
+
+          "restaurant": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "website_url",
+              "address",
+              "city",
+              "neighborhood_guess",
+              "service_style",
+              "price_tier",
+              "cuisine_slugs",
+              "contact",
+              "locations"
+            ],
+            "properties": {
+              "name": { "type": "string" },
+              "website_url": { "type": [ "string", "null" ] },
+              "address": { "type": [ "string", "null" ] },
+              "city": { "type": [ "string", "null" ] },
+              "neighborhood_guess": { "type": [ "string", "null" ] },
+
+              "service_style": {
+                "type": "string",
+                "enum": [ "fine_dining", "casual", "fast_casual", "takeaway", "bar_cafe", "hotel", "unknown" ]
+              },
+              "price_tier": {
+                "type": "string",
+                "enum": [ "low", "mid", "high", "unknown" ]
+              },
+
+              "cuisine_slugs": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+
+              "contact": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "has_contact_page",
+                  "email",
+                  "phone",
+                  "contact_url",
+                  "chef_or_owner_named",
+                  "reservation_platform"
+                ],
+                "properties": {
+                  "has_contact_page": { "type": "boolean" },
+                  "email": { "type": [ "string", "null" ] },
+                  "phone": { "type": [ "string", "null" ] },
+                  "contact_url": { "type": [ "string", "null" ] },
+                  "chef_or_owner_named": { "type": "boolean" },
+                  "reservation_platform": {
+                    "type": "string",
+                    "enum": [ "opentable", "thefork", "resy", "sevenrooms", "phone_only", "unknown", "none" ]
+                  }
+                }
+              },
+
+              "locations": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "location_count_guess", "is_chain_guess" ],
+                "properties": {
+                  "location_count_guess": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "is_chain_guess": { "type": "boolean" }
+                }
+              }
+            }
+          },
+
+          "signals": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "geo", "menu", "brand", "operations", "pipeline" ],
+            "properties": {
+              "geo": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "distance_km", "delivery_feasible", "neighborhood_match" ],
+                "properties": {
+                  "distance_km": {
+                    "type": [ "number", "null" ],
+                    "minimum": 0
+                  },
+                  "delivery_feasible": { "type": "boolean" },
+                  "neighborhood_match": {
+                    "type": "string",
+                    "enum": [ "high", "medium", "low", "unknown" ]
+                  }
+                }
+              },
+
+              "menu": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "menu_fit", "uses_target_products", "target_product_mentions", "menu_url", "seasonality_alignment" ],
+                "properties": {
+                  "menu_fit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "uses_target_products": { "type": "boolean" },
+                  "target_product_mentions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [ "product_slug", "mention_text" ],
+                      "properties": {
+                        "product_slug": { "type": "string" },
+                        "mention_text": { "type": "string" }
+                      }
+                    }
+                  },
+                  "menu_url": { "type": [ "string", "null" ] },
+                  "seasonality_alignment": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+
+              "brand": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "sustainability_affinity", "local_sourcing_language", "keywords" ],
+                "properties": {
+                  "sustainability_affinity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "local_sourcing_language": { "type": "boolean" },
+                  "keywords": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                }
+              },
+
+              "operations": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "volume_potential", "operational_risk", "opening_hours_known", "catering_or_events", "delivery_or_takeaway" ],
+                "properties": {
+                  "volume_potential": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "operational_risk": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "opening_hours_known": { "type": "boolean" },
+                  "catering_or_events": { "type": "boolean" },
+                  "delivery_or_takeaway": { "type": "boolean" }
+                }
+              },
+
+              "pipeline": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "stage", "last_contacted_at", "inbound_interest" ],
+                "properties": {
+                  "stage": {
+                    "type": "string",
+                    "enum": [ "new", "researched", "contacted", "responded", "meeting_set", "won", "lost" ]
+                  },
+                  "last_contacted_at": {
+                    "type": [ "string", "null" ],
+                    "format": "date-time"
+                  },
+                  "inbound_interest": { "type": "boolean" }
+                }
+              }
+            }
+          },
+
+          "rubric": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "menu_fit_score", "local_affinity_score", "volume_score", "outreach_ease_score", "brand_alignment_score", "risk_score" ],
+            "properties": {
+              "menu_fit_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "local_affinity_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "volume_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "outreach_ease_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "brand_alignment_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "risk_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              }
+            }
+          },
+
+          "confidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [ "overall", "by_factor" ],
+            "properties": {
+              "overall": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "by_factor": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "geo", "menu", "brand", "operations", "outreach" ],
+                "properties": {
+                  "geo": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "menu": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "brand": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "operations": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "outreach": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          },
+
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [ "factor", "claim", "source_url", "excerpt" ],
+              "properties": {
+                "factor": {
+                  "type": "string",
+                  "enum": [ "geo", "menu", "brand", "operations", "outreach", "price", "cuisine" ]
+                },
+                "claim": { "type": "string" },
+                "source_url": { "type": [ "string", "null" ] },
+                "excerpt": { "type": "string" }
+              }
+            }
+          },
+
+          "missing_info": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+
+      "people": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "full_name",
+            "title",
+            "email",
+            "phone",
+            "linkedin_url",
+            "source_url",
+            "source_type",
+            "evidence_excerpt",
+            "confidence"
+          ],
+          "properties": {
+            "role": { "type": "string" },
+            "full_name": { "type": "string" },
+            "title": { "type": [ "string", "null" ] },
+            "email": { "type": [ "string", "null" ] },
+            "phone": { "type": [ "string", "null" ] },
+            "linkedin_url": { "type": [ "string", "null" ] },
+            "source_url": { "type": [ "string", "null" ] },
+            "source_type": { "type": "string" },
+            "evidence_excerpt": { "type": "string" },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
