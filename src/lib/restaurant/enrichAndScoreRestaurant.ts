@@ -1,6 +1,6 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { RestaurantEnrichOutputV1 } from "@/lib/schemas/restaurant"; // adjust import to your zod export
-import { scoreRestaurantLead } from "@/lib/scoring/scoreRestaurantLead"; // your scoring fn
+import { scoreRestaurantLead } from "@/lib/scoreRestaurantLead"; // your scoring fn
 import { gptEnrichRestaurant } from "@/lib/gpt/gptEnrichRestaurant"; // existing GPT enrich
 
 type PipelineSignals = {

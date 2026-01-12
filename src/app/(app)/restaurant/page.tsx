@@ -97,7 +97,7 @@ export default async function RestaurantPage() {
                                     <div className="flex items-center gap-2">
                                         <StageBadge stage={r.stage} />
                                         <Button asChild variant="outline" size="sm">
-                                            <Link href={`/restaurants/${r.id}`}>Open</Link>
+                                            <Link href={`/restaurant/${r.id}`}>Open</Link>
                                         </Button>
                                     </div>
                                 </div>

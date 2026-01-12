@@ -1,7 +1,7 @@
 // src/lib/restaurant/enrichRestaurantLeadFeaturesFromUrl.ts
 
 import { RestaurantEnrichOutputV1 } from "@/lib/schemas/restaurant";
-import type { RestaurantLeadFeaturesV1 } from "@/lib/leadScoring";
+import type { RestaurantLeadFeaturesV1 } from "@/lib/scoreRestaurantLead";
 import { gptEnrichRestaurant } from "@/lib/gpt/gptEnrichRestaurant";
 import type { ScrapeSources } from "@/lib/scrape/scrapeRestaurantSources";
 
@@ -85,7 +85,7 @@ export async function enrichRestaurantLeadFeaturesFromUrl(args: {
         restaurant_name_hint,
         address_hint,
         pipeline: {
-            stage: "new",
+            stage: "initiated",
             last_contacted_at: null,
             inbound_interest: false,
         },

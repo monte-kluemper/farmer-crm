@@ -27,6 +27,7 @@
         "properties": {
           "name": { "type": "string" },
           "website_url": { "type": [ "string", "null" ] },
+          "instagram_url": { "type": [ "string", "null" ] },
           "address": { "type": [ "string", "null" ] },
           "city": { "type": [ "string", "null" ] },
           "neighborhood_guess": { "type": [ "string", "null" ] },
@@ -169,14 +170,14 @@
             }
           },
 
-          "pipeline": {
+          "pipeline": { 
             "type": "object",
             "additionalProperties": false,
             "required": [ "stage", "last_contacted_at", "inbound_interest" ],
             "properties": {
               "stage": {
                 "type": "string",
-                "enum": [ "new", "researched", "contacted", "responded", "meeting_set", "won", "lost" ]
+                "enum": [ "initiated", "researched", "contacted", "responded", "meeting_set", "won", "lost" ]
               },
               "last_contacted_at": {
                 "type": [ "string", "null" ],

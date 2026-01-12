@@ -76,6 +76,7 @@ export const DEFAULT_WEIGHTS_V1: LeadScoreWeightsV1 = {
     }
 };
 
+function clamp05(n: number) { return Math.max(0, Math.min(5, n)); }
 function clamp01(x: number) { return Math.max(0, Math.min(1, x)); }
 function clamp100(x: number) { return Math.max(0, Math.min(100, x)); }
 function boolTo01(b: boolean) { return b ? 1 : 0; }
@@ -98,9 +99,10 @@ function rubric05To01(x: number) {
     return clamp01(x / 5);
 }
 
+
 function stageBonusTo01(stage: RestaurantLeadFeaturesV1["signals"]["pipeline"]["stage"]) {
     switch (stage) {
-        case "new": return 0.0;
+        case "identified": return 0.0;
         case "researched": return 0.1;
         case "contacted": return 0.2;
         case "responded": return 0.45;
@@ -144,6 +146,13 @@ export function scoreRestaurantLead(
     const features = RestaurantLeadFeaturesV1Schema.parse(input);
     const w = opts.weights ?? DEFAULT_WEIGHTS_V1;
     const reasons: string[] = [];
+
+    features.rubric.menu_fit_score = clamp05(features.rubric.menu_fit_score);
+    features.rubric.local_affinity_score = clamp05(features.rubric.local_affinity_score);
+    features.rubric.volume_score = clamp05(features.rubric.volume_score);
+    features.rubric.outreach_ease_score = clamp05(features.rubric.outreach_ease_score);
+    features.rubric.brand_alignment_score = clamp05(features.rubric.brand_alignment_score);
+    features.rubric.risk_score = clamp05(features.rubric.risk_score);
 
     // Stage freeze
     const stage = features.signals.pipeline.stage;

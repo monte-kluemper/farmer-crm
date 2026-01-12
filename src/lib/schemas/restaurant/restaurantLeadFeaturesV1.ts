@@ -8,6 +8,7 @@ export const RestaurantProfileV1 = z
 
     name: z.string(),
     website_url: z.string().nullable(),
+    instagram_url: z.string().nullable(),
 
     address: z.string().nullable().optional(),
     city: z.string().nullable().optional(),
@@ -190,7 +191,7 @@ export const RestaurantLeadFeaturesV1 = z
       }),
 
       pipeline: z.object({
-        stage: z.enum(["new", "researched", "contacted", "responded", "meeting_set", "won", "lost"]),
+        stage: z.enum(["initiated", "researched", "contacted", "responded", "meeting_set", "won", "lost"]),
         last_contacted_at: z.string().datetime().nullable(),
         inbound_interest: z.boolean().default(false),
       }),
