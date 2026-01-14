@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://your-domain.com/schemas/restaurant_identity_v1.json",
+  "title": "RestaurantIdentityV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canonical_name",
+    "canonical_website_url",
+    "address",
+    "phone",
+    "city",
+    "geo",
+    "identity_confidence",
+    "evidence",
+    "candidates"
+  ],
+  "properties": {
+    "canonical_name": {
+      "type": "string",
+      "description": "Canonical, human-readable name of the restaurant"
+    },
+    "canonical_website_url": {
+      "type": [ "string", "null" ],
+      "format": "uri",
+      "description": "Canonical website URL for the restaurant, if known"
+    },
+    "address": {
+      "type": [ "string", "null" ],
+      "description": "Full street address of the restaurant"
+    },
+    "phone": {
+      "type": [ "string", "null" ],
+      "description": "Primary phone number of the restaurant"
+    },
+    "city": {
+      "type": [ "string", "null" ],
+      "description": "City in which the restaurant is located"
+    },
+    "geo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [ "lat", "lng" ],
+      "properties": {
+        "lat": {
+          "type": [ "number", "null" ],
+          "description": "Latitude"
+        },
+        "lng": {
+          "type": [ "number", "null" ],
+          "description": "Longitude"
+        }
+      }
+    },
+    "identity_confidence": {
+      "type": "string",
+      "enum": [ "low", "medium", "high" ],
+      "description": "Confidence that this identity uniquely represents a single restaurant"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matched_schema_org",
+        "matched_footer_nap",
+        "matched_contact_page",
+        "excerpts",
+        "notes"
+      ],
+      "properties": {
+        "matched_schema_org": {
+          "type": "boolean",
+          "description": "True if schema.org JSON-LD was used as a primary signal"
+        },
+        "matched_footer_nap": {
+          "type": "boolean",
+          "description": "True if name/address/phone were matched in footer or site-wide content"
+        },
+        "matched_contact_page": {
+          "type": "boolean",
+          "description": "True if identity signals came from a contact/about page"
+        },
+        "excerpts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "description": "Verbatim text excerpts supporting the identity decision"
+        },
+        "notes": {
+          "type": [ "string", "null" ],
+          "description": "Optional explanatory notes about the identity resolution"
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "Alternative plausible restaurant identities if confidence is low",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [ "name", "address", "website_url", "reason" ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Candidate restaurant name"
+          },
+          "address": {
+            "type": [ "string", "null" ],
+            "description": "Candidate restaurant address"
+          },
+          "website_url": {
+            "type": [ "string", "null" ],
+            "format": "uri",
+            "description": "Candidate restaurant website"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why this candidate is plausible"
+          }
+        }
+      }
+    }
+  }
+}

@@ -25,6 +25,9 @@ type LocationsV1 = {
 export type ContactLocationsCardProps = {
     contactJson?: unknown | null;
     locationsJson?: unknown | null;
+
+    /** NEW: header action area (e.g., refresh button) */
+    actions?: React.ReactNode;
 };
 
 function safeUrl(url?: string | null) {
@@ -41,7 +44,9 @@ function parseContactV1(v: unknown): ContactV1 | null {
 
     const has_contact_page = typeof o.has_contact_page === "boolean" ? o.has_contact_page : null;
     const reservation_platform =
-        typeof o.reservation_platform === "string" ? (o.reservation_platform as ContactV1["reservation_platform"]) : null;
+        typeof o.reservation_platform === "string"
+            ? (o.reservation_platform as ContactV1["reservation_platform"])
+            : null;
 
     if (has_contact_page == null || reservation_platform == null) return null;
 
@@ -64,15 +69,17 @@ function parseLocationsV1(v: unknown): LocationsV1 | null {
     return { location_count_guess, is_chain_guess };
 }
 
-export function ContactLocationsCard({ contactJson, locationsJson }: ContactLocationsCardProps) {
+export function ContactLocationsCard({ contactJson, locationsJson, actions }: ContactLocationsCardProps) {
     const contact = parseContactV1(contactJson);
     const locations = parseLocationsV1(locationsJson);
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-base">Contact & Locations</CardTitle>
+                {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
             </CardHeader>
+
             <CardContent className="space-y-4">
                 <div>
                     <div className="text-sm text-muted-foreground">Contact</div>

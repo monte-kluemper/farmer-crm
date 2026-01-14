@@ -1,3 +1,4 @@
+// src/lib/restaurant/enrichScoreAndPersist.ts
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { scoreRestaurantLead, DEFAULT_WEIGHTS_V1 } from "@/lib/scoreRestaurantLead";
 import type { RestaurantLeadFeaturesV1 } from "@/lib/scoreRestaurantLead";
@@ -10,16 +11,7 @@ export async function enrichScoreAndPersistRestaurant(args: {
     restaurantId: string;
     url: string;
     radius_km: number;
-
-    /**
-     * Optional flags
-     */
     refreshPeople?: boolean;
-
-    /**
-     * Optional externally gathered text for people research
-     * (search snippets, press excerpts, directory text, etc.)
-     */
     peopleSources?: {
         search_snippets?: string | null;
         press?: string | null;
@@ -38,15 +30,11 @@ export async function enrichScoreAndPersistRestaurant(args: {
 
     const supabase = createSupabaseAdminClient();
 
-    // ---------------------------------------------------------------------------
-    // 1) Enrich restaurant lead features (website-based)
-    // ---------------------------------------------------------------------------
+    // 1) Enrich lead features
     const leadFeatures: RestaurantLeadFeaturesV1 =
         await enrichRestaurantLeadFeaturesFromUrl({ url, radius_km });
 
-    // ---------------------------------------------------------------------------
     // 2) Score
-    // ---------------------------------------------------------------------------
     const breakdown = scoreRestaurantLead(leadFeatures, {
         radius_km,
         weights: DEFAULT_WEIGHTS_V1,
@@ -55,9 +43,7 @@ export async function enrichScoreAndPersistRestaurant(args: {
     const explanation =
         breakdown.reasons.length > 0 ? breakdown.reasons.join(" | ") : null;
 
-    // ---------------------------------------------------------------------------
-    // 3) Persist restaurant-level fields
-    // ---------------------------------------------------------------------------
+    // 3) Persist restaurant
     const { error: restaurantError } = await supabase
         .from("restaurants")
         .update({
@@ -80,19 +66,25 @@ export async function enrichScoreAndPersistRestaurant(args: {
         .eq("id", restaurantId)
         .eq("farm_id", farmId);
 
-    if (restaurantError) {
-        throw new Error(restaurantError.message);
-    }
+    if (restaurantError) throw new Error(restaurantError.message);
 
-    // ---------------------------------------------------------------------------
-    // 4) Optional: enrich chef / manager via GPT-5 and upsert restaurant_people
-    // ---------------------------------------------------------------------------
+    // 4) Optional: refresh people via GPT-5
     if (refreshPeople) {
+        // Fetch instagram_url (and optionally other canonical fields) from DB
+        const { data: rRow, error: rRowErr } = await supabase
+            .from("restaurants")
+            .select("name, city, website_url, instagram_url")
+            .eq("id", restaurantId)
+            .eq("farm_id", farmId)
+            .single();
+
+        if (rRowErr) throw new Error(rRowErr.message);
+
         const { people } = await enrichRestaurantPeople({
-            restaurantName: leadFeatures.restaurant.name,
-            city: leadFeatures.restaurant.city ?? null,
-            websiteUrl: leadFeatures.restaurant.website_url ?? null,
-            instagramUrl: leadFeatures.restaurant.instagram_url ?? null,
+            restaurantName: rRow?.name ?? leadFeatures.restaurant.name,
+            city: rRow?.city ?? leadFeatures.restaurant.city ?? null,
+            websiteUrl: rRow?.website_url ?? leadFeatures.restaurant.website_url ?? null,
+            instagramUrl: rRow?.instagram_url ?? null, // ✅ no TS error now
             sources: peopleSources,
         });
 
@@ -114,13 +106,9 @@ export async function enrichScoreAndPersistRestaurant(args: {
 
             const { error: peopleError } = await supabase
                 .from("restaurant_people")
-                .upsert(rows, {
-                    onConflict: "restaurant_id,role,full_name",
-                });
+                .upsert(rows, { onConflict: "restaurant_id,role,full_name" });
 
-            if (peopleError) {
-                throw new Error(peopleError.message);
-            }
+            if (peopleError) throw new Error(peopleError.message);
         }
     }
 

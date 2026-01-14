@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { RestaurantProfileCard } from "@/components/restaurant/restaurant-profile-card";
 import { CuisineCard } from "@/components/restaurant/cuisine-card";
 import { ContactLocationsCard } from "@/components/restaurant/contact-locations-card";
+import { RefreshContactsButton } from "@/components/restaurant/refresh-contacts-button";
 
 type PageProps = {
     params: Promise<{ id: string }>;
@@ -299,7 +300,11 @@ export default async function RestaurantPage(props: PageProps) {
                     <div className="space-y-3 lg:col-span-2">
                         <div className="grid gap-3 md:grid-cols-2">
                             <CuisineCard cuisineSlugs={r.cuisine_slugs} cuisineTypes={r.cuisine_types} />
-                            <ContactLocationsCard contactJson={r.contact} locationsJson={r.locations} />
+                            <ContactLocationsCard
+                                contactJson={r.contact}
+                                locationsJson={r.locations}
+                                actions={<RefreshContactsButton restaurantId={r.id} />}
+                            />
                         </div>
 
                         {/* People (compact rows) */}

@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
     const protectedPaths = ["/dashboard", "/restaurant", "/customers", "/settings"];
     const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-    console.log("isProtected:", isProtected, "Pathname:", pathname, "User:", user);
+    //console.log("isProtected:", isProtected, "Pathname:", pathname, "User:", user);
 
     if (isProtected) {
         if (!user) {

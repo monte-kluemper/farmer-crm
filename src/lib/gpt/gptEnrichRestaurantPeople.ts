@@ -1,5 +1,27 @@
 import { openai } from "@/lib/openai/server";
 
+
+type ResponsesOutputText = {
+    type: "output_text";
+    text: string;
+};
+
+type ResponsesOutputItem = {
+    id?: string;
+    type?: string;
+    role?: string;
+    content?: ResponsesOutputText[];
+};
+
+type ResponsesCreateResult = {
+    id?: string;
+    model?: string;
+    output?: ResponsesOutputItem[];
+    output_text?: string;
+    output_parsed?: unknown;
+};
+
+
 /**
  * Output shape is intentionally narrow and safe to upsert
  * into restaurant_people.
@@ -149,13 +171,19 @@ Important:
 - Return ONLY the JSON object.
 `;
 
-    const resp = await openai.responses.create(
+
+    console.log("REFRESH CONTACTS::SYSTEM=" + system);
+    console.log("REFRESH CONTACTS::USER=" + user);
+
+    const resp = (await openai.responses.create(
         {
             model: "gpt-5",
             input: [
                 { role: "system", content: system },
                 { role: "user", content: user },
             ],
+            tools: [{ type: "web_search" }],      // <- critical
+            tool_choice: "auto",                 // <- let it use the tool
             text: {
                 format: {
                     type: "json_schema",
@@ -164,23 +192,60 @@ Important:
                     strict: true,
                 },
             },
-        } as unknown as Parameters<typeof openai.responses.create>[0]
+        }
+    )) as ResponsesCreateResult;
+
+    // --------------------
+    // Debug logging (safe)
+    // --------------------
+    console.log("GPT people response id:", resp.id);
+    console.log("GPT people model:", resp.model);
+    console.log("GPT people output_text:", resp.output_text);
+    console.log(
+        "GPT people output items:",
+        JSON.stringify(resp.output ?? null, null, 2)
     );
 
-    // SDK variance handling (same pattern you already use)
-    const parsed = (resp as unknown as { output_parsed?: unknown }).output_parsed;
-    if (parsed) return parsed;
+    // --------------------
+    // Preferred path: SDK-parsed output
+    // --------------------
+    if (resp.output_parsed !== undefined) {
+        console.log(
+            "GPT people output_parsed:",
+            JSON.stringify(resp.output_parsed, null, 2)
+        );
+        return resp.output_parsed;
+    }
 
-    const outputText = (resp as unknown as { output_text?: string }).output_text ?? "";
+    // --------------------
+    // Fallback: extract text from output items
+    // --------------------
+    const jsonTextFromOutput =
+        resp.output
+            ?.flatMap((item) => item.content ?? [])
+            .find((c): c is ResponsesOutputText => c.type === "output_text")
+            ?.text ?? null;
+
+    // --------------------
+    // Final fallback: output_text
+    // --------------------
+    const outputText = jsonTextFromOutput ?? resp.output_text ?? "";
+
     if (!outputText) {
         throw new Error("GPT returned no output_text and no output_parsed.");
     }
 
-    const start = outputText.indexOf("{");
-    const end = outputText.lastIndexOf("}");
-    if (start === -1 || end === -1 || end <= start) {
-        throw new Error("No JSON object found in GPT output_text.");
+    // With strict JSON schema, the text should already be valid JSON
+    try {
+        return JSON.parse(outputText) as unknown;
+    } catch (err) {
+        throw new Error(
+            `Failed to parse GPT JSON output. Raw text (first 500 chars): ${outputText.slice(
+                0,
+                500
+            )}`
+        );
     }
 
-    return JSON.parse(outputText.slice(start, end + 1));
+
 }
